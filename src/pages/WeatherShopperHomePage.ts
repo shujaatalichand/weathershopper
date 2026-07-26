@@ -17,7 +17,7 @@ export class WeatherShopperHomePage {
   }
 
   async goto() {
-    await this.page.goto('/', { waitUntil: 'domcontentloaded' });
+    await this.page.goto('/', { waitUntil: 'load' });
   }
 
   async getTemperatureValue(): Promise<number> {

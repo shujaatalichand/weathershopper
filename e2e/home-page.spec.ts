@@ -1,6 +1,6 @@
 import { test } from '../src/fixtures/homePageFixture';
 
-test.describe.only('Home Page', () => {
+test.describe('Home Page', () => {
 
   test('should load successfully',
     { tag: ['@smoke'] },
