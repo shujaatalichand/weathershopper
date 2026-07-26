@@ -60,6 +60,14 @@ export class ProductsPage {
     return cheapest;
   }
 
+  async addCheapestProducts(keywords: string[]): Promise<Product[]> {
+    const products: Product[] = [];
+    for (const keyword of keywords) {
+      products.push(await this.addCheapestProductContaining(keyword));
+    }
+    return products;
+  }
+
   async goToCart(): Promise<CartPage> {
     await Promise.all([
       this.page.waitForURL('**/cart'),
