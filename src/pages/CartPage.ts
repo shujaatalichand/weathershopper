@@ -22,8 +22,10 @@ export class CartPage {
     await expect(this.body).toContainText(name);
   }
 
-  async assertItemInCart(name: string, price: number) {
-    await expect(this.body).toContainText(name);
-    await expect(this.body).toContainText(String(price));
+  async assertItemInCart(products: { name: string; price: number }[]) {
+    for (const product of products) {
+      await expect(this.body).toContainText(product.name);
+      await expect(this.body).toContainText(String(product.price));
+    }
   }
 }
