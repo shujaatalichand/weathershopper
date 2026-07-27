@@ -12,6 +12,7 @@ export class ProductsPage {
   readonly heading: Locator;
   readonly productCards: Locator;
   readonly cartButton: Locator;
+  readonly cartCount: Locator;
   readonly nameSelector: string;
   readonly priceSelector: string;
 
@@ -20,6 +21,7 @@ export class ProductsPage {
     this.heading = page.getByRole('heading', { level: 2 });
     this.productCards = page.locator('.text-center.col-4');
     this.cartButton = page.locator('button[onclick="goToCart()"]');
+    this.cartCount = page.locator('#cart');
     this.nameSelector = 'p.font-weight-bold';
     this.priceSelector = 'p';
   }
@@ -54,6 +56,9 @@ export class ProductsPage {
   async addCheapestProductContaining(keyword: string): Promise<Product> {
     const products = await this.getProducts();
     const matches = products.filter((product) => product.name.toLowerCase().includes(keyword.toLowerCase()));
+    if (matches.length === 0) {
+      throw new Error(`No product found containing "${keyword}"`);
+    }
     const cheapest = matches.reduce((min, product) => (product.price < min.price ? product : min));
     await this.page.waitForFunction(() => typeof (window as any).addToCart === 'function');
     await cheapest.addButton.click();
@@ -66,6 +71,10 @@ export class ProductsPage {
       products.push(await this.addCheapestProductContaining(keyword));
     }
     return products;
+  }
+
+  async assertCartCount(count: number) {
+    await expect(this.cartCount).toHaveText(`${count} item(s)`);
   }
 
   async goToCart(): Promise<CartPage> {

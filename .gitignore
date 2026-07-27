@@ -13,3 +13,7 @@ node_modules/
 
 # OS
 .DS_Store
+
+# Prod test data (real environment, not for source control)
+/src/test-data/prod/*
+!/src/test-data/prod/.gitkeep
