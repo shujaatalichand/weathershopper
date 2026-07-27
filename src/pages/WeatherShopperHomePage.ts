@@ -1,5 +1,4 @@
 import { Page, Locator, expect } from '@playwright/test';
-import { ProductsPage } from './ProductsPage';
 
 export class WeatherShopperHomePage {
   readonly page: Page;
@@ -38,23 +37,21 @@ export class WeatherShopperHomePage {
     expect(temperature).toBeGreaterThan(0);
   }
 
-  async buyMoisturizers(): Promise<ProductsPage> {
+  async buyMoisturizers(): Promise<void> {
     await this.buyMoisturizersButton.click();
-    return new ProductsPage(this.page);
   }
 
-  async buySunscreens(): Promise<ProductsPage> {
+  async buySunscreens(): Promise<void> {
     await this.buySunscreensButton.click();
-    return new ProductsPage(this.page);
   }
 
-  async shopForWeatherAppropriateProduct(): Promise<ProductsPage> {
+  async shopForWeatherAppropriateProduct(): Promise<number> {
     const temperature = await this.getTemperatureValue();
-    const productsPage = temperature < 19
-      ? await this.buyMoisturizers()
-      : await this.buySunscreens();
-
-    await productsPage.assertLoadedForTemperature(temperature);
-    return productsPage;
+    if (temperature < 19) {
+      await this.buyMoisturizers();
+    } else {
+      await this.buySunscreens();
+    }
+    return temperature;
   }
 }

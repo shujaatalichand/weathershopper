@@ -1,5 +1,4 @@
 import { Page, Locator, FrameLocator, expect } from '@playwright/test';
-import { ConfirmationPage } from './ConfirmationPage';
 import { loadTestData } from '../../utils/testData';
 
 type CardDetails = {
@@ -58,7 +57,7 @@ export class CartPage {
     }
   }
 
-  async payWithCard(details: CardDetails = {}): Promise<ConfirmationPage> {
+  async payWithCard(details: CardDetails = {}): Promise<void> {
     const defaultCard: Required<CardDetails> = loadTestData('card.json');
     const {
       email = defaultCard.email,
@@ -94,7 +93,5 @@ export class CartPage {
         await this.page.goBack({ waitUntil: 'load' });
       }
     }
-
-    return new ConfirmationPage(this.page);
   }
 }

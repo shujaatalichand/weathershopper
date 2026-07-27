@@ -1,4 +1,4 @@
-import { test } from '../src/fixtures/homePageFixture';
+import { test } from '../src/fixtures/pagesFixture';
 
 test.describe('Home Page', () => {
 
@@ -11,16 +11,17 @@ test.describe('Home Page', () => {
 
   test('should shop for moisturizers when it is cold and sunscreens when it is hot, and complete checkout',
     { tag: ['@smoke'] },
-    async ({ homePage }) => {
-      const productsPage = await homePage.shopForWeatherAppropriateProduct();
+    async ({ homePage, productsPage, cartPage, confirmationPage }) => {
+      const temperature = await homePage.shopForWeatherAppropriateProduct();
+      await productsPage.assertLoadedForTemperature(temperature);
 
       const products = await productsPage.addCheapestProductsForCategory();
 
-      const cartPage = await productsPage.goToCart();
+      await productsPage.goToCart();
       await cartPage.assertLoaded();
       await cartPage.assertItemInCart(products);
 
-      const confirmationPage = await cartPage.payWithCard();
+      await cartPage.payWithCard();
       await confirmationPage.assertPaymentSuccess();
   });
 
