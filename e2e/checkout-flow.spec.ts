@@ -1,8 +1,8 @@
 import { test } from '../src/fixtures/homePageFixture';
 
-test.describe('Product Listing Page', () => {
+test.describe('Checkout Flow', () => {
 
-  test('should add the cheapest Aloe and Almond moisturizers to the cart',
+  test('should add the cheapest Aloe and Almond moisturizers to the cart and complete checkout',
     { tag: ['@regression'] },
     async ({ homePage }) => {
       const productsPage = await homePage.buyMoisturizers();
@@ -13,9 +13,12 @@ test.describe('Product Listing Page', () => {
       const cartPage = await productsPage.goToCart();
       await cartPage.assertLoaded();
       await cartPage.assertItemInCart(products);
+
+      const confirmationPage = await cartPage.payWithCard();
+      await confirmationPage.assertPaymentSuccess();
   });
 
-  test('should add the cheapest SPF-50 and SPF-30 sunscreens to the cart',
+  test('should add the cheapest SPF-50 and SPF-30 sunscreens to the cart and complete checkout',
     { tag: ['@regression'] },
     async ({ homePage }) => {
       const productsPage = await homePage.buySunscreens();
@@ -26,6 +29,9 @@ test.describe('Product Listing Page', () => {
       const cartPage = await productsPage.goToCart();
       await cartPage.assertLoaded();
       await cartPage.assertItemInCart(products);
+
+      const confirmationPage = await cartPage.payWithCard();
+      await confirmationPage.assertPaymentSuccess();
   });
 
 });

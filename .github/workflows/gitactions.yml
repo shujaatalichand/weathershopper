@@ -10,7 +10,7 @@ on:
       env:
         description: 'Environment'
         required: true
-        default: 'prod'
+        default: 'stage'
         type: choice
         options: [ example, stage, prod ]
       suite:
@@ -18,7 +18,7 @@ on:
         required: true
         default: 'e2e'
         type: choice
-        options: [ e2e, api, smoke, regression ]
+        options: [ e2e, smoke, regression ]
 
 jobs:
   test:
@@ -37,8 +37,8 @@ jobs:
 
     - name: Run Playwright tests
       env:
-        ENV: ${{ github.event.inputs.env || 'prod' }}
-      run: npm run test:${{ github.event.inputs.env || 'prod' }}:${{ github.event.inputs.suite || 'e2e' }} -- --project=chromium
+        ENV: ${{ github.event.inputs.env || 'stage' }}
+      run: npm run test:${{ github.event.inputs.env || 'stage' }}:${{ github.event.inputs.suite || 'e2e' }} -- --project=chromium
 
     - name: Generate Allure Report
       if: ${{ !cancelled() }}
