@@ -7,6 +7,7 @@ type CardDetails = {
   cardNumber?: string;
   expiry?: string;
   cvc?: string;
+  zip?: string;
 };
 
 export class CartPage {
@@ -21,6 +22,7 @@ export class CartPage {
   readonly cardNumberInput: Locator;
   readonly expiryInput: Locator;
   readonly cvcInput: Locator;
+  readonly zipInput: Locator;
   readonly stripeSubmitButton: Locator;
   private readonly maxPaymentAttempts = 3;
 
@@ -36,6 +38,7 @@ export class CartPage {
     this.cardNumberInput = this.stripeFrame.locator('#card_number');
     this.expiryInput = this.stripeFrame.locator('#cc-exp');
     this.cvcInput = this.stripeFrame.locator('#cc-csc');
+    this.zipInput = this.stripeFrame.locator('#billing-zip');
     this.stripeSubmitButton = this.stripeFrame.getByRole('button', { name: /Pay/ });
   }
 
@@ -62,6 +65,7 @@ export class CartPage {
       cardNumber = defaultCard.cardNumber,
       expiry = defaultCard.expiry,
       cvc = defaultCard.cvc,
+      zip = defaultCard.zip,
     } = details;
 
     for (let attempt = 1; attempt <= this.maxPaymentAttempts; attempt++) {
@@ -70,6 +74,11 @@ export class CartPage {
       await this.cardNumberInput.fill(cardNumber);
       await this.expiryInput.fill(expiry);
       await this.cvcInput.fill(cvc);
+      await this.zipInput.evaluate((el: HTMLInputElement, value: string) => {
+        el.value = value;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      }, zip);
 
       await Promise.all([
         this.page.waitForURL('**/confirmation'),

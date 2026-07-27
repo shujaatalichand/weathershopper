@@ -73,6 +73,12 @@ export class ProductsPage {
     return products;
   }
 
+  async addCheapestProductsForCategory(): Promise<Product[]> {
+    const category = await this.heading.innerText();
+    const keywords = category === 'Moisturizers' ? ['Aloe', 'Almond'] : ['SPF-50', 'SPF-30'];
+    return this.addCheapestProducts(keywords);
+  }
+
   async assertCartCount(count: number) {
     await expect(this.cartCount).toHaveText(`${count} item(s)`);
   }

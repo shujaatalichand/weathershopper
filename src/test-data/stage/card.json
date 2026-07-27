@@ -2,5 +2,6 @@
   "email": "test@example.com",
   "cardNumber": "4242424242424242",
   "expiry": "12/34",
-  "cvc": "123"
+  "cvc": "123",
+  "zip": "12345"
 }
