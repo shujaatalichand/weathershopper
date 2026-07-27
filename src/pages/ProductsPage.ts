@@ -1,5 +1,4 @@
 import { Page, Locator, expect } from '@playwright/test';
-import { CartPage } from './CartPage';
 
 type Product = {
   name: string;
@@ -83,11 +82,10 @@ export class ProductsPage {
     await expect(this.cartCount).toHaveText(`${count} item(s)`);
   }
 
-  async goToCart(): Promise<CartPage> {
+  async goToCart(): Promise<void> {
     await Promise.all([
       this.page.waitForURL('**/cart'),
       this.cartButton.click(),
     ]);
-    return new CartPage(this.page);
   }
 }
