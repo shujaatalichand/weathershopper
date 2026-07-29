@@ -1,0 +1,6 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","30998","should add the cheapest SPF-50 and SPF-30 sunscreens to the cart and complete checkout","chromium","2026-07-29","passed","2026-07-29","Checkout Flow","Home Page","",""
+"","10594","should shop for moisturizers when it is cold and sunscreens when it is hot, and complete checkout","chromium","2026-07-29","passed","2026-07-29","Home Page","Home Page","",""
+"","15565","should add the cheapest Aloe and Almond moisturizers to the cart and complete checkout","chromium","2026-07-29","passed","2026-07-29","Checkout Flow","Home Page","",""
+"","8428","should show the correct title and the added items","chromium","2026-07-29","passed","2026-07-29","Cart Page","Home Page","",""
+"","1629","should load successfully","chromium","2026-07-29","passed","2026-07-29","Home Page","Home Page","",""
