@@ -54,7 +54,7 @@ A Playwright + TypeScript end-to-end test suite for [Weather Shopper](https://we
 ## Installation
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/shujaatalichand/weathershopper.git
 cd weathershopper
 npm install
 ```
