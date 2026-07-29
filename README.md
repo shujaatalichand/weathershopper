@@ -119,7 +119,7 @@ npm test -- --ui
 - `fullyParallel: true`, `workers: 2` (both locally and in CI)
 - `retries: 1` for failed tests
 - `forbidOnly` is enforced in CI (a stray `test.only` will fail the build)
-- Tests run in headed mode by default (`headless: false` in config) with tracing always on (`trace: 'on'`) and screenshots on failure
+- Tests run headed locally and headless in CI (`headless: !!process.env.CI` in config, since GitHub Actions runners have no display) with tracing always on (`trace: 'on'`) and screenshots on failure
 
 ## Reports
 
