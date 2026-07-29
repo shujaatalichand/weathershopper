@@ -12,7 +12,6 @@ type CardDetails = {
 export class CartPage {
   readonly page: Page;
   readonly heading: Locator;
-  readonly total: Locator;
   readonly body: Locator;
   readonly payButton: Locator;
   readonly stripeFrame: FrameLocator;
@@ -28,7 +27,6 @@ export class CartPage {
   constructor(page: Page) {
     this.page = page;
     this.heading = page.getByRole('heading', { name: 'Checkout' });
-    this.total = page.locator('#total');
     this.body = page.locator('body');
     this.payButton = page.getByRole('button', { name: 'Pay with Card' });
     this.stripeFrame = page.frameLocator('iframe[name="stripe_checkout_app"]');
@@ -44,10 +42,6 @@ export class CartPage {
   async assertLoaded() {
     await expect(this.page).toHaveTitle('Cart Items');
     await expect(this.heading).toBeVisible();
-  }
-
-  async assertContainsItem(name: string) {
-    await expect(this.body).toContainText(name);
   }
 
   async assertItemInCart(products: { name: string; price: number }[]) {

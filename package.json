@@ -2,34 +2,18 @@
   "name": "tests",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "postinstall": "npx playwright install",
 
-    "test:example": "npm run allure:clean && ENV=example npx playwright test",
-    "test:stage": "npm run allure:clean && ENV=stage npx playwright test",
-    "test:prod": "npm run allure:clean && ENV=prod npx playwright test",
-
-    "test:example:e2e": "npm run allure:clean && ENV=example npx playwright test e2e/",
-    "test:example:smoke": "npm run allure:clean && ENV=example npx playwright test --grep @smoke",
-    "test:example:regression": "npm run allure:clean && ENV=example npx playwright test --grep @regression",
-
-    "test:stage:e2e": "npm run allure:clean && ENV=stage npx playwright test e2e/",
-    "test:stage:smoke": "npm run allure:clean && ENV=stage npx playwright test --grep @smoke",
-    "test:stage:regression": "npm run allure:clean && ENV=stage npx playwright test --grep @regression",
-
-    "test:prod:e2e": "npm run allure:clean && ENV=prod npx playwright test e2e/",
-    "test:prod:smoke": "npm run allure:clean && ENV=prod npx playwright test --grep @smoke",
-    "test:prod:regression": "npm run allure:clean && ENV=prod npx playwright test --grep @regression",
+    "test": "node scripts/run-tests.js",
 
     "allure:clean": "rm -rf allure-results allure-report",
     "allure:generate": "npx allure generate allure-results -o allure-report --clean",
     "allure:open": "npx allure open allure-report",
     "allure:report": "npm run allure:generate && npm run allure:open"
   },
-  "keywords": [],
   "author": "Shujaat Ali Chand",
-  "license": "ISC",
+  "license": "MIT",
   "type": "commonjs",
   "devDependencies": {
     "@playwright/test": "^1.59.1",
