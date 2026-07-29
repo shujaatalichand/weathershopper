@@ -149,6 +149,10 @@ npx playwright show-trace test-results/<test-folder>/trace.zip
 
 It installs dependencies, installs Playwright browsers with OS deps, runs `npm test -- --env=<env> [--tag=<suite>] --project=chromium` (no `--tag` when `suite` is `e2e`, i.e. everything), generates the Allure report, and uploads both the Allure report and the Playwright report as build artifacts (30-day retention).
 
+On every push to `main`, the Allure report (with trend history across runs) is also published to GitHub Pages:
+
+**[shujaatalichand.github.io/weathershopper](https://shujaatalichand.github.io/weathershopper/)**
+
 ## Adding a new test
 
 1. Create a Page Object in `src/pages/` for the locators and actions on the page you're testing.
