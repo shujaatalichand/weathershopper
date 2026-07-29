@@ -83,6 +83,13 @@ jobs:
         allure_history: allure-history
         keep_reports: 20
 
+    - name: Remove leftover git metadata from Allure history
+      # simple-elf/allure-report-action runs as root inside Docker and leaves a
+      # root-owned .git dir here, which the runner user can't clean up itself and
+      # which then clobbers the orphan repo peaceiris/actions-gh-pages creates.
+      if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
+      run: sudo rm -rf allure-history/.git
+
     - name: Publish Allure report to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
       if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
