@@ -27,6 +27,9 @@ A Playwright + TypeScript end-to-end test suite for [Weather Shopper](https://we
 ├── utils/
 │   └── testData.ts              # Loads a JSON file from src/test-data/<ENV>/ based on the ENV var
 │
+├── scripts/
+│   └── run-tests.js             # Parses --env/--tag/--project for `npm test`, cleans Allure, runs Playwright
+│
 ├── playwright.config.ts         # Central Playwright config (projects, timeouts, reporters, env loading)
 ├── .env.example / .env.stage / .env.prod   # Per-environment BASE_URL
 ├── tsconfig.json
@@ -38,9 +41,9 @@ A Playwright + TypeScript end-to-end test suite for [Weather Shopper](https://we
 ### Architecture notes
 
 - **Page Object Model**: UI locators and actions should live in `src/pages/*`. Specs should interact with these classes rather than raw selectors.
-- **Fixtures over `beforeEach`**: give each spec file its own fixture in `src/fixtures/*Fixture.ts` that extends Playwright's `test`, handling navigation/setup and injecting ready-to-use page objects into tests.
-- **Environment-driven config**: `playwright.config.ts` reads `process.env.ENV` (defaulting to `stage`) and loads `.env.<ENV>` via `dotenv`, exposing `BASE_URL` to tests. Only `stage` currently has a `BASE_URL` set (`https://weathershopper.pythonanywhere.com`), the only real deployment. `example` and `prod` are left without a `BASE_URL` as placeholders — running against them throws immediately until those deployments exist and their `.env.*` files are filled in.
-- **Environment-scoped test data**: `utils/testData.ts` loads `src/test-data/<ENV>/<filename>.json`, so test data can differ per environment. Add JSON files there as needed. `src/test-data/prod/` is git-ignored (aside from `.gitkeep`) since a real prod deployment would need real-looking data that shouldn't be committed; `stage` and `example` data are safe to commit.
+- **Fixtures over `beforeEach`**: `src/fixtures/pagesFixture.ts` extends Playwright's `test` and exposes one fixture per page object (`homePage`, `productsPage`, `cartPage`, `confirmationPage`), all bound to the same `page`, each handling its own navigation/setup. Specs import `test` from this file and destructure whichever page objects they need — no manual instantiation or chaining between page objects.
+- **Environment-driven config**: `playwright.config.ts` reads `process.env.ENV` (defaulting to `prod`) and loads `.env.<ENV>` via `dotenv`, exposing `BASE_URL` to tests. Only `prod` currently has a `BASE_URL` set (`https://weathershopper.pythonanywhere.com`), the only real deployment. `example` and `stage` are left without a `BASE_URL` as placeholders — running against them throws immediately until those deployments exist and their `.env.*` files are filled in.
+- **Environment-scoped test data**: `utils/testData.ts` loads `src/test-data/<ENV>/<filename>.json`, so test data can differ per environment. Add JSON files there as needed. `src/test-data/stage/` is git-ignored (aside from `.gitkeep`) since a real stage deployment would need real-looking data that shouldn't be committed; `prod` and `example` data are safe to commit.
 - **Tags**: tag tests with Playwright's `test(name, { tag: [...] }, fn)` syntax (e.g. `@smoke`, `@regression`) to enable `--grep` filtering. Add new tag-specific `npm run` scripts as the suite grows.
 
 ## Prerequisites
@@ -64,71 +67,52 @@ npx playwright install
 
 ## Environment configuration
 
-The suite is wired for three environments, selected via the `ENV` variable: `example`, `stage`, `prod`. Each maps to a `.env.<ENV>` file, but only `stage` is a real deployment today:
+The suite is wired for three environments, selected via the `ENV` variable: `example`, `stage`, `prod`. Each maps to a `.env.<ENV>` file, but only `prod` is a real deployment today:
 
 ```bash
-# .env.stage
+# .env.prod
 BASE_URL=https://weathershopper.pythonanywhere.com
-ENV=stage
+ENV=prod
 ```
 
-`.env.example` and `.env.prod` are placeholders with no `BASE_URL` set. If `BASE_URL` isn't resolvable for the selected `ENV`, `playwright.config.ts` throws immediately with a clear error — so running `test:example` or `test:prod` today will fail until those environments exist and their `.env.*` files are filled in. `ENV` defaults to `stage` when unset.
+`.env.example` and `.env.stage` are placeholders with no `BASE_URL` set. If `BASE_URL` isn't resolvable for the selected `ENV`, `playwright.config.ts` throws immediately with a clear error — so running `npm test -- --env=example` or `--env=stage` today will fail until those environments exist and their `.env.*` files are filled in. `ENV` defaults to `prod` when unset.
 
 ## Running tests
 
-Tests are run via `npm run` scripts that combine **environment** × **scope**. The pattern is:
-
-```
-npm run test:<env>[:<scope>]
-```
-
-Where `<env>` is `example`, `stage`, or `prod`, and `<scope>` is one of: `e2e`, `smoke`, `regression`.
-
-### All tests, per environment
+There's a single test entry point, `npm test`, parametrized via flags rather than a separate `npm run` script per environment/tag/browser combination. It runs `scripts/run-tests.js`, which cleans the previous Allure results (`allure:clean`) and then invokes `npx playwright test` with the resolved options:
 
 ```bash
-npm run test:stage       # everything, against stage (the only live environment today)
-npm run test:example     # will fail until an example deployment + .env.example are set up
-npm run test:prod        # will fail until a prod deployment + .env.prod are set up
+npm test -- [--env=<env>] [--tag=<tag>] [--project=<project>] [any other playwright test flags/args]
 ```
 
-### By folder
+- `--env`: `example`, `stage`, or `prod`. Sets `ENV` for `playwright.config.ts`/`dotenv`. Defaults to `prod` (the only live environment today).
+- `--tag`: filters to a Playwright tag, e.g. `smoke` or `regression` (translates to `--grep @<tag>`). Omit to run everything.
+- `--project`: restricts to one browser project (`chromium`, `firefox`, `webkit`). Omit to run all three.
+- Anything else you pass after `--` that isn't one of the flags above (a spec path, `-g "name"`, `--headed`, `--debug`, `--ui`, ...) is forwarded straight to `npx playwright test`.
 
 ```bash
-npm run test:stage:e2e   # only e2e/**/*.spec.ts
-```
+# Everything, against prod, all browsers
+npm test
 
-### By tag
+# Only @smoke tests, against stage
+npm test -- --env=stage --tag=smoke
 
-```bash
-npm run test:stage:smoke        # @smoke
-npm run test:stage:regression   # @regression
-```
+# @regression on firefox only
+npm test -- --tag=regression --project=firefox
 
-### Running Playwright directly (custom combinations)
-
-Any combination not covered by an `npm run` script can be run directly with `npx playwright test`, as long as `ENV` is set (or omitted, since it defaults to `stage`):
-
-```bash
-# Single spec file
-ENV=stage npx playwright test e2e/some.spec.ts
+# Single spec file, headed/debug
+npm test -- e2e/some.spec.ts --headed --debug
 
 # Single test by name
-ENV=stage npx playwright test -g "should do something"
-
-# Specific browser project
-ENV=stage npx playwright test --project=firefox
-
-# Headed / debug mode
-ENV=stage npx playwright test e2e/some.spec.ts --headed --debug
+npm test -- -g "should do something"
 
 # UI mode (interactive test runner)
-ENV=stage npx playwright test --ui
+npm test -- --ui
 ```
 
 ### Browsers
 
-`playwright.config.ts` currently defines a single active project, `chromium` (the `firefox` and `webkit` projects are present but commented out). Use `--project=<name>` to restrict to a specific project once more are enabled.
+`playwright.config.ts` defines three active projects: `chromium`, `firefox`, and `webkit`. Tests run across all of them by default; use `--project=<name>` to restrict to a single one.
 
 ### Parallelism & retries
 
@@ -148,7 +132,7 @@ npm run allure:open       # serve/open the generated report
 npm run allure:report     # generate + open in one step
 ```
 
-Every `test:*` script runs `allure:clean` first, so results don't leak between runs. Raw Playwright artifacts (traces, screenshots, videos) are written to `test-results/` and `playwright-report/`.
+`npm test` always runs `allure:clean` first, so results don't leak between runs. Raw Playwright artifacts (traces, screenshots, videos) are written to `test-results/` and `playwright-report/`.
 
 To view a trace from a failed test:
 
@@ -160,15 +144,15 @@ npx playwright show-trace test-results/<test-folder>/trace.zip
 
 `.github/workflows/gitactions.yml` runs on push/PR to `main`, and can also be triggered manually (`workflow_dispatch`) with two inputs:
 
-- **env**: `example` | `stage` | `prod` (default `stage`, the only live environment today)
+- **env**: `example` | `stage` | `prod` (default `prod`, the only live environment today)
 - **suite**: `e2e` | `smoke` | `regression` (default `e2e`)
 
-It installs dependencies, installs Playwright browsers with OS deps, runs `npm run test:<env>:<suite>`, generates the Allure report, and uploads both the Allure report and the Playwright report as build artifacts (30-day retention).
+It installs dependencies, installs Playwright browsers with OS deps, runs `npm test -- --env=<env> [--tag=<suite>] --project=chromium` (no `--tag` when `suite` is `e2e`, i.e. everything), generates the Allure report, and uploads both the Allure report and the Playwright report as build artifacts (30-day retention).
 
 ## Adding a new test
 
 1. Create a Page Object in `src/pages/` for the locators and actions on the page you're testing.
-2. If the test needs pre-navigated/pre-set-up state, add a fixture in `src/fixtures/` that extends Playwright's `test` and injects your page object.
+2. If the page needs pre-navigated/pre-set-up state, add a fixture entry for it in `src/fixtures/pagesFixture.ts`, following the existing `homePage`/`productsPage`/etc. pattern, so specs can request it by name.
 3. Write the spec in `e2e/`, tagging it appropriately: `test('...', { tag: ['@smoke'] }, async ({ page }) => { ... })`.
 4. If the test needs data, add it to `src/test-data/<env>/<filename>.json` and load via `loadTestData('<filename>.json')`.
-5. Run it locally with `ENV=stage npx playwright test <path-to-spec>` before opening a PR.
+5. Run it locally with `npm test -- <path-to-spec>` before opening a PR.
