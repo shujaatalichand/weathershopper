@@ -147,7 +147,7 @@ npx playwright show-trace test-results/<test-folder>/trace.zip
 - **env**: `example` | `stage` | `prod` (default `prod`, the only live environment today)
 - **suite**: `e2e` | `smoke` | `regression` (default `e2e`)
 
-It installs dependencies, installs Playwright browsers with OS deps, runs `npm test -- --env=<env> [--tag=<suite>] --project=chromium` (no `--tag` when `suite` is `e2e`, i.e. everything), generates the Allure report, and uploads both the Allure report and the Playwright report as build artifacts (30-day retention).
+It runs `npm install`, which also installs Playwright's browser binaries via the `postinstall` hook (`npx playwright install`), then runs `npm test -- --env=<env> [--tag=<suite>] --project=chromium` (no `--tag` when `suite` is `e2e`, i.e. everything), generates the Allure report, and uploads both the Allure report and the Playwright report as build artifacts (30-day retention).
 
 On every push to `main`, the Allure report (with trend history across runs) is also published to GitHub Pages:
 
